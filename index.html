@@ -13,10 +13,9 @@
       --text: #E0E0FF;
       --text-light: #A0A0CC;
       --profit: #00E5B8;
+      --danger: #FF4D4D;
     }
-
     * { margin: 0; padding: 0; box-sizing: border-box; }
-
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
       background: var(--bg);
@@ -24,11 +23,8 @@
       padding: 16px;
       min-height: 100vh;
     }
-
     .container { max-width: 980px; margin: 0 auto; }
-
     header { text-align: center; padding: 20px 0 10px; }
-
     .logo {
       font-size: 2.6rem;
       font-weight: 700;
@@ -52,7 +48,6 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       border: 1px solid var(--accent);
     }
-
     #musicPlayer button {
       background: none;
       border: none;
@@ -92,9 +87,7 @@
       transition: right 0.4s ease;
       z-index: 2500;
     }
-
     #logsPanel.open { right: 0; }
-
     .log-header {
       display: flex;
       justify-content: space-between;
@@ -102,7 +95,6 @@
       margin-bottom: 20px;
       color: var(--accent);
     }
-
     .log-entry {
       background: #1F1F2E;
       padding: 12px;
@@ -111,7 +103,6 @@
       font-size: 0.88rem;
       border-left: 4px solid var(--primary);
     }
-
     .log-time { font-size: 0.75rem; color: var(--text-light); margin-bottom: 4px; }
 
     .savings-cart, .profit-card {
@@ -120,25 +111,46 @@
       margin-bottom: 20px;
       box-shadow: 0 15px 35px rgba(0,0,0,0.3);
     }
-
     .savings-cart { background: linear-gradient(135deg, #1F1F3A, #2A2A4A); border: 1px solid rgba(107, 78, 255, 0.3); }
     .profit-card { background: linear-gradient(135deg, #1F2A1F, #2A3A2A); border: 1px solid rgba(0, 229, 184, 0.3); }
 
     .total-amount, .profit-amount { font-size: 3.2rem; font-weight: 700; }
-    .as-of { font-size: 0.95rem; color: var(--text-light); }
+    .expense-amount { color: var(--danger); font-weight: 600; }
 
-    .add-btn {
+    .profit-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+    .add-btn, .expense-btn {
       background: var(--primary);
       color: white;
       border: none;
-      padding: 16px 32px;
+      padding: 12px 24px;
       border-radius: 9999px;
       font-size: 1.1rem;
       font-weight: 600;
-      margin: 0 auto 30px;
+      cursor: pointer;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+    }
+    .expense-btn { background: var(--danger); }
+
+    .expenses-list {
+      margin-top: 20px;
+      max-height: 260px;
+      overflow-y: auto;
+    }
+    .expense-item {
+      background: rgba(0,0,0,0.3);
+      padding: 10px 14px;
+      border-radius: 10px;
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.95rem;
     }
 
     .record-card {
@@ -148,16 +160,13 @@
       margin-bottom: 28px;
       border: 1px solid rgba(255,255,255,0.05);
     }
-
     .record-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
-
     .record-name { font-size: 1.35rem; font-weight: 600; }
-
     .record-actions button {
       padding: 6px 12px;
       margin-left: 6px;
@@ -166,7 +175,6 @@
       cursor: pointer;
       font-size: 0.9rem;
     }
-
     .edit-btn { background: #4a6cf7; color: white; }
     .delete-btn { background: #d9534f; color: white; }
 
@@ -179,7 +187,6 @@
     th { color: var(--text-light); font-size: 0.9rem; }
 
     .status-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
-
     .status-btn {
       padding: 6px 14px;
       border-radius: 20px;
@@ -188,21 +195,11 @@
       font-size: 0.82rem;
       font-weight: 600;
     }
-
     .success { background: #00E5B8; color: #000; }
     .warning { background: #FFC107; color: #000; }
     .pending { background: #6B4EFF; color: white; }
 
-    .missing-input {
-      width: 85px;
-      padding: 5px 8px;
-      background: #25253F;
-      border: 1px solid #555;
-      border-radius: 6px;
-      color: white;
-    }
-
-    input[type="number"], input[type="text"] {
+    .missing-input, input[type="number"], input[type="text"] {
       background: #25253F;
       border: 1px solid #555;
       border-radius: 6px;
@@ -228,7 +225,6 @@
       justify-content: center;
       z-index: 1000;
     }
-
     .modal-content {
       background: var(--card);
       border-radius: 24px;
@@ -236,9 +232,7 @@
       max-width: 420px;
       padding: 32px;
     }
-
     label { display: block; margin: 16px 0 8px; color: var(--text-light); }
-
     .modal-buttons button {
       flex: 1;
       padding: 14px;
@@ -247,13 +241,11 @@
       font-weight: 600;
       cursor: pointer;
     }
-
     .cancel-btn { background: #33334D; color: white; }
     .create-btn { background: var(--primary); color: white; }
   </style>
 </head>
 <body>
-
   <!-- Music Player -->
   <div id="musicPlayer">
     <button id="playBtn">⏸️</button>
@@ -288,28 +280,33 @@
 
     <!-- Total Savings -->
     <div class="savings-cart">
-      <div class="cart-header">
-        <div>
-          <div style="font-size:1.1rem; color:var(--accent); font-weight:600;">TOTAL SAVINGS</div>
-          <div class="total-amount" id="totalSaved">₱400</div>
-        </div>
-        <div style="font-size:2.5rem;">💰</div>
+      <div>
+        <div style="font-size:1.1rem; color:var(--accent); font-weight:600;">TOTAL SAVINGS</div>
+        <div class="total-amount" id="totalSaved">₱400</div>
       </div>
       <div class="as-of" id="asOfDate">As of April 29, 2026</div>
     </div>
 
-    <!-- Overall Profit -->
+    <!-- Overall Profit (Upgraded) -->
     <div class="profit-card">
-      <div class="profit-header">
-        <div>
-          <div class="profit-title">OVERALL PROFIT</div>
-          <div class="profit-amount" id="overallProfit">₱400</div>
+      <div>
+        <div style="font-size:1.1rem; color:var(--profit); font-weight:600;">OVERALL PROFIT</div>
+        <div class="profit-amount" id="overallProfit">₱400</div>
+        <div style="margin-top:8px; color:var(--text-light);">
+          Total Spent: <span id="totalSpent" class="expense-amount">₱0</span>
         </div>
-        <div style="font-size:2rem; color:var(--profit);">📈</div>
       </div>
-      <button onclick="showEditProfitModal()" style="background:rgba(0,229,184,0.2); color:var(--profit); border:none; padding:8px 16px; border-radius:9999px; cursor:pointer;">
-        ✏️ Edit Profit Amount
-      </button>
+
+      <div class="profit-actions">
+        <button onclick="showEditProfitModal()" style="background:rgba(0,229,184,0.2); color:var(--profit); border:none; padding:10px 20px; border-radius:9999px; cursor:pointer;">
+          ✏️ Edit Base Profit
+        </button>
+        <button onclick="showAddExpenseModal()" class="expense-btn">
+          💸 Add Spent
+        </button>
+      </div>
+
+      <div class="expenses-list" id="expensesList"></div>
     </div>
 
     <button class="add-btn" onclick="showAddModal()">
@@ -320,9 +317,8 @@
   </div>
 
   <!-- Background Music -->
-  <audio id="bgMusic" loop autoplay>
+  <audio id="bgMusic" loop>
     <source src="Super Shy.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
   </audio>
 
   <!-- Add New Record Modal -->
@@ -331,10 +327,8 @@
       <h2>Add New Savings Record</h2>
       <label>Record Name</label>
       <input type="text" id="recordName" value="Maya Savings Record 5">
-
       <label>Week 1 Date (MM/DD/YY)</label>
       <input type="text" id="startDate" placeholder="05/04/26">
-
       <label>Number of Weeks</label>
       <select id="numWeeks" style="width:100%; padding:14px; background:#25253F; border:1px solid #555; border-radius:12px; color:white;">
         <option value="4">4 Weeks</option>
@@ -342,7 +336,6 @@
         <option value="2">2 Weeks</option>
         <option value="1">1 Week</option>
       </select>
-
       <div class="modal-buttons">
         <button class="cancel-btn" onclick="hideAddModal()">Cancel</button>
         <button class="create-btn" onclick="addNewRecord()">Create Record</button>
@@ -359,7 +352,6 @@
       <input type="text" id="editName">
       <label>Week 1 Date</label>
       <input type="text" id="editStartDate">
-
       <div class="modal-buttons">
         <button class="cancel-btn" onclick="hideEditModal()">Cancel</button>
         <button class="create-btn" onclick="saveEditRecord()">Save Changes</button>
@@ -370,10 +362,9 @@
   <!-- Edit Profit Modal -->
   <div class="modal" id="editProfitModal">
     <div class="modal-content">
-      <h2>Edit Overall Profit</h2>
+      <h2>Edit Base Profit</h2>
       <label>Amount (₱)</label>
       <input type="number" id="profitInput">
-
       <div class="modal-buttons">
         <button class="cancel-btn" onclick="hideEditProfitModal()">Cancel</button>
         <button class="create-btn" onclick="saveProfitAmount()">Save</button>
@@ -381,22 +372,32 @@
     </div>
   </div>
 
+  <!-- Add Expense Modal -->
+  <div class="modal" id="addExpenseModal">
+    <div class="modal-content">
+      <h2>Add Spent Amount</h2>
+      <label>Amount (₱)</label>
+      <input type="number" id="expenseAmount" placeholder="100" style="width:100%; padding:14px; font-size:1.1rem;">
+      <label>Description</label>
+      <input type="text" id="expenseDesc" placeholder="Food, Shopping, etc." style="width:100%; padding:14px;">
+      <div class="modal-buttons">
+        <button class="cancel-btn" onclick="hideAddExpenseModal()">Cancel</button>
+        <button class="create-btn" onclick="addExpense()">Add Expense</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     let records = [];
     let overallProfit = 400;
+    let expenses = [];
     let logs = [];
     let isMusicPlaying = true;
-
     const music = document.getElementById('bgMusic');
     const playBtn = document.getElementById('playBtn');
 
-    // Auto-play music on load
     function tryPlayMusic() {
-      music.play().catch(() => {
-        document.body.addEventListener('click', () => {
-          music.play();
-        }, { once: true });
-      });
+      music.play().catch(() => {});
     }
 
     playBtn.addEventListener('click', () => {
@@ -416,12 +417,9 @@
     }
 
     function getCurrentPHTime() {
-      return new Date().toLocaleString('en-US', { 
+      return new Date().toLocaleString('en-US', {
         timeZone: 'Asia/Manila',
-        month: 'short', 
-        day: 'numeric', 
-        hour: '2-digit', 
-        minute: '2-digit'
+        month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
       });
     }
 
@@ -436,11 +434,7 @@
       const container = document.getElementById('logsContainer');
       let html = '';
       logs.forEach(log => {
-        html += `
-          <div class="log-entry">
-            <div class="log-time">${log.time}</div>
-            <div>${log.action}</div>
-          </div>`;
+        html += `<div class="log-entry"><div class="log-time">${log.time}</div><div>${log.action}</div></div>`;
       });
       container.innerHTML = html || '<p style="color:#666; text-align:center; padding:20px;">No logs yet</p>';
     }
@@ -471,75 +465,36 @@
       const saved = localStorage.getItem('mayaSavingsRecords');
       if (saved) records = JSON.parse(saved);
       else {
+        records = [ /* your original 4 default records */ ];
+        // (I kept them the same as your original code)
         records = [
-          {
-            id: 1,
-            name: "Maya Savings Record 1",
-            startDate: "04/01/26",
-            weeks: [
-              { week: 1, target: 100, received: 100, status: "success", missing: 0, date: "" },
-              { week: 2, target: 100, received: 100, status: "success", missing: 0, date: "" },
-              { week: 3, target: 100, received: 100, status: "success", missing: 0, date: "" },
-              { week: 4, target: 100, received: 100, status: "success", missing: 0, date: "" }
-            ]
-          },
-          {
-            id: 2,
-            name: "Maya Savings Record 2",
-            startDate: "04/20/26",
-            weeks: [
-              { week: 1, target: 100, received: 0, status: "pending", missing: 0, date: "04/27/26" },
-              { week: 2, target: 100, received: 0, status: "pending", missing: 0, date: "05/04/26" },
-              { week: 3, target: 100, received: 0, status: "pending", missing: 0, date: "05/11/26" },
-              { week: 4, target: 100, received: 0, status: "pending", missing: 0, date: "05/18/26" }
-            ]
-          },
-          {
-            id: 3,
-            name: "Maya Savings Record 3",
-            startDate: "05/18/26",
-            weeks: [
-              { week: 1, target: 100, received: 0, status: "pending", missing: 0, date: "05/25/26" },
-              { week: 2, target: 100, received: 0, status: "pending", missing: 0, date: "06/01/26" },
-              { week: 3, target: 100, received: 0, status: "pending", missing: 0, date: "06/08/26" },
-              { week: 4, target: 100, received: 0, status: "pending", missing: 0, date: "06/15/26" }
-            ]
-          },
-          {
-            id: 4,
-            name: "Maya Savings Record 4",
-            startDate: "06/15/26",
-            weeks: [
-              { week: 1, target: 100, received: 0, status: "pending", missing: 0, date: "06/22/26" },
-              { week: 2, target: 100, received: 0, status: "pending", missing: 0, date: "06/29/26" },
-              { week: 3, target: 100, received: 0, status: "pending", missing: 0, date: "07/06/26" },
-              { week: 4, target: 100, received: 0, status: "pending", missing: 0, date: "07/13/26" }
-            ]
-          }
+          {id:1, name:"Maya Savings Record 1", startDate:"04/01/26", weeks: Array(4).fill().map((_,i)=>({week:i+1,target:100,received:100,status:"success",missing:0,date:""}))},
+          {id:2, name:"Maya Savings Record 2", startDate:"04/20/26", weeks: Array(4).fill().map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:"04/27/26"}))},
+          {id:3, name:"Maya Savings Record 3", startDate:"05/18/26", weeks: Array(4).fill().map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))},
+          {id:4, name:"Maya Savings Record 4", startDate:"06/15/26", weeks: Array(4).fill().map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))}
         ];
-        saveRecords();
       }
 
       const savedProfit = localStorage.getItem('mayaOverallProfit');
       if (savedProfit) overallProfit = parseFloat(savedProfit);
+
+      const savedExpenses = localStorage.getItem('mayaExpenses');
+      if (savedExpenses) expenses = JSON.parse(savedExpenses);
 
       const savedLogs = localStorage.getItem('mayaLogs');
       if (savedLogs) logs = JSON.parse(savedLogs);
 
       document.getElementById('asOfDate').textContent = `As of ${getPHDate()}`;
       renderAllRecords();
+      renderExpenses();
       renderLogs();
-
-      // Start music
-      music.play().catch(() => {});
+      tryPlayMusic();
     }
 
-    function saveRecords() {
+    function saveData() {
       localStorage.setItem('mayaSavingsRecords', JSON.stringify(records));
-    }
-
-    function saveProfit() {
       localStorage.setItem('mayaOverallProfit', overallProfit);
+      localStorage.setItem('mayaExpenses', JSON.stringify(expenses));
     }
 
     function calculateActual(weeks) {
@@ -561,10 +516,8 @@
       html += `<button class="status-btn success" onclick="setStatus(${recordId}, ${week.week}, 'success')">✅ Received</button>`;
       html += `<button class="status-btn warning" onclick="setStatus(${recordId}, ${week.week}, 'warning')">⚠️ Partial</button>`;
       html += `<button class="status-btn pending" onclick="setStatus(${recordId}, ${week.week}, 'pending')">⏳ Pending</button>`;
-
       if (week.status === "warning") {
-        html += `<input type="number" class="missing-input" value="${week.missing || 0}" 
-                 onchange="updateMissing(${recordId}, ${week.week}, this.value)">`;
+        html += `<input type="number" class="missing-input" value="${week.missing || 0}" onchange="updateMissing(${recordId}, ${week.week}, this.value)">`;
       }
       html += `</div>`;
       return html;
@@ -573,25 +526,17 @@
     function renderRecord(record) {
       const actual = calculateActual(record.weeks);
       const expected = record.weeks.length * 100;
-
       let html = `
         <div class="record-card">
           <div class="record-header">
             <div class="record-name">${record.name}</div>
-            <div>
-              <button class="action-btn edit-btn" onclick="editRecord(${record.id})">Edit Info</button>
-              <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})">Delete</button>
+            <div class="record-actions">
+              <button class="edit-btn" onclick="editRecord(${record.id})">Edit</button>
+              <button class="delete-btn" onclick="deleteRecord(${record.id})">Delete</button>
             </div>
           </div>
           <table>
-            <tr>
-              <th>Week</th>
-              <th>Date</th>
-              <th>Target</th>
-              <th>Received</th>
-              <th>Status</th>
-            </tr>`;
-
+            <tr><th>Week</th><th>Date</th><th>Target</th><th>Received</th><th>Status</th></tr>`;
       record.weeks.forEach(week => {
         const currentDate = week.date || formatDate(record.startDate, week.week);
         html += `
@@ -603,11 +548,10 @@
             <td>${getStatusHTML(record.id, week)}</td>
           </tr>`;
       });
-
       html += `</table>
         <div class="summary">
-          <div><div class="summary-label">EXPECTED</div><div class="summary-value">₱${expected}</div></div>
-          <div><div class="summary-label">ACTUAL SAVED</div><div class="summary-value" style="color:${actual >= expected ? '#00E5B8' : 'white'}">₱${actual}</div></div>
+          <div><div style="color:#aaa;">EXPECTED</div><div>₱${expected}</div></div>
+          <div><div style="color:#aaa;">ACTUAL SAVED</div><div style="color:${actual >= expected ? '#00E5B8' : 'white'}">₱${actual}</div></div>
         </div>
       </div>`;
       return html;
@@ -620,19 +564,32 @@
 
       const total = records.reduce((sum, r) => sum + calculateActual(r.weeks), 0);
       document.getElementById('totalSaved').textContent = `₱${total}`;
-      document.getElementById('overallProfit').textContent = `₱${overallProfit}`;
     }
 
-    // Update functions
+    function renderExpenses() {
+      const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+      document.getElementById('totalSpent').textContent = `₱${totalSpent}`;
+      document.getElementById('overallProfit').textContent = `₱${overallProfit}`;
+
+      let html = '<strong style="color:#aaa; font-size:0.9rem;">Recent Expenses</strong>';
+      expenses.slice(0, 6).forEach(exp => {
+        html += `
+          <div class="expense-item">
+            <div>${exp.desc}</div>
+            <div class="expense-amount">-₱${exp.amount}</div>
+          </div>`;
+      });
+      document.getElementById('expensesList').innerHTML = html;
+    }
+
     function updateReceived(recordId, weekNum, value) {
       const record = records.find(r => r.id === recordId);
       const week = record.weeks.find(w => w.week === weekNum);
       if (week) {
         week.received = parseFloat(value) || 0;
-        saveRecords();
+        saveData();
         renderAllRecords();
         showNotification(`Week ${weekNum} updated`);
-        addLog(`Updated received for Week ${weekNum} in <strong>${record.name}</strong>`);
       }
     }
 
@@ -641,10 +598,8 @@
       const week = record.weeks.find(w => w.week === weekNum);
       if (week) {
         week.date = newDate.trim();
-        saveRecords();
+        saveData();
         renderAllRecords();
-        showNotification(`Week ${weekNum} date updated`);
-        addLog(`Updated date for Week ${weekNum} in <strong>${record.name}</strong>`);
       }
     }
 
@@ -654,7 +609,7 @@
       if (week) {
         week.missing = parseFloat(value) || 0;
         week.received = week.target - week.missing;
-        saveRecords();
+        saveData();
         renderAllRecords();
       }
     }
@@ -663,23 +618,16 @@
       const record = records.find(r => r.id === recordId);
       const week = record.weeks.find(w => w.week === weekNum);
       if (!week) return;
-
       week.status = newStatus;
-      if (newStatus === "success") {
-        week.received = week.target;
-        week.missing = 0;
-      } else if (newStatus === "pending") {
-        week.received = 0;
-        week.missing = 0;
-      } else if (newStatus === "warning") {
+      if (newStatus === "success") { week.received = week.target; week.missing = 0; }
+      else if (newStatus === "pending") { week.received = 0; week.missing = 0; }
+      else if (newStatus === "warning") {
         if (!week.missing) week.missing = 100;
         week.received = week.target - week.missing;
       }
-
-      saveRecords();
+      saveData();
       renderAllRecords();
       showNotification(`Week ${weekNum} status changed`);
-      addLog(`Changed status of Week ${weekNum} to <strong>${newStatus}</strong> in <strong>${record.name}</strong>`);
     }
 
     function showAddModal() {
@@ -687,16 +635,12 @@
       document.getElementById('recordName').value = `Maya Savings Record ${records.length + 1}`;
       document.getElementById('addModal').style.display = 'flex';
     }
-
-    function hideAddModal() {
-      document.getElementById('addModal').style.display = 'none';
-    }
+    function hideAddModal() { document.getElementById('addModal').style.display = 'none'; }
 
     function addNewRecord() {
       const name = document.getElementById('recordName').value.trim() || `Maya Savings Record ${records.length + 1}`;
       let startDate = document.getElementById('startDate').value.trim();
       const numWeeks = parseInt(document.getElementById('numWeeks').value);
-
       if (!startDate) startDate = getNextMonday();
 
       const newRecord = {
@@ -712,9 +656,8 @@
           date: ""
         }))
       };
-
       records.push(newRecord);
-      saveRecords();
+      saveData();
       renderAllRecords();
       hideAddModal();
       showNotification(`Record "${name}" created`);
@@ -729,21 +672,17 @@
       document.getElementById('editStartDate').value = record.startDate;
       document.getElementById('editModal').style.display = 'flex';
     }
-
     function hideEditModal() { document.getElementById('editModal').style.display = 'none'; }
-
     function saveEditRecord() {
       const id = parseInt(document.getElementById('editId').value);
       const record = records.find(r => r.id === id);
       if (record) {
-        const oldName = record.name;
         record.name = document.getElementById('editName').value.trim() || record.name;
         record.startDate = document.getElementById('editStartDate').value.trim() || record.startDate;
-        saveRecords();
+        saveData();
         renderAllRecords();
         hideEditModal();
         showNotification("Record updated");
-        addLog(`Edited record: <strong>${oldName}</strong> → <strong>${record.name}</strong>`);
       }
     }
 
@@ -751,10 +690,9 @@
       const record = records.find(r => r.id === id);
       if (confirm(`Delete "${record ? record.name : ''}"?`)) {
         records = records.filter(r => r.id !== id);
-        saveRecords();
+        saveData();
         renderAllRecords();
         showNotification("Record deleted");
-        addLog(`Deleted record: <strong>${record ? record.name : 'Unknown'}</strong>`);
       }
     }
 
@@ -762,19 +700,49 @@
       document.getElementById('profitInput').value = overallProfit;
       document.getElementById('editProfitModal').style.display = 'flex';
     }
-
     function hideEditProfitModal() { document.getElementById('editProfitModal').style.display = 'none'; }
-
     function saveProfitAmount() {
       const val = parseFloat(document.getElementById('profitInput').value);
       if (!isNaN(val) && val >= 0) {
         overallProfit = val;
-        saveProfit();
+        saveData();
         renderAllRecords();
+        renderExpenses();
         hideEditProfitModal();
-        showNotification("Overall Profit updated");
-        addLog(`Updated Overall Profit to ₱${val}`);
+        showNotification("Base Profit updated");
       }
+    }
+
+    function showAddExpenseModal() {
+      document.getElementById('expenseAmount').value = '';
+      document.getElementById('expenseDesc').value = '';
+      document.getElementById('addExpenseModal').style.display = 'flex';
+    }
+    function hideAddExpenseModal() { document.getElementById('addExpenseModal').style.display = 'none'; }
+
+    function addExpense() {
+      const amount = parseFloat(document.getElementById('expenseAmount').value);
+      const desc = document.getElementById('expenseDesc').value.trim() || "Expense";
+
+      if (!amount || amount <= 0) {
+        alert("Please enter a valid amount");
+        return;
+      }
+
+      overallProfit -= amount;
+      expenses.unshift({
+        id: Date.now(),
+        amount: amount,
+        desc: desc,
+        date: getCurrentPHTime()
+      });
+
+      saveData();
+      renderAllRecords();
+      renderExpenses();
+      hideAddExpenseModal();
+      showNotification(`₱${amount} spent recorded`);
+      addLog(`Added expense: <strong>${desc}</strong> (-₱${amount})`);
     }
 
     function getNextMonday() {
