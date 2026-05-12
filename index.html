@@ -132,7 +132,7 @@
 
     <div style="text-align:right; margin-bottom:12px; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
       <button onclick="manualDownload()" style="background:var(--accent); color:#000; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer; font-weight:600;">⬇️ Save database.txt</button>
-      <button onclick="document.getElementById('importFileInput').click()" style="background:#4a6cf7; color:white; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer; font-weight:600;">📤 Import File</button>
+      <button onclick="document.getElementById('importFileInput').click()" style="background:#4a6cf7; color:white; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer; font-weight:600;">📁 Import</button>
       <button onclick="toggleLogs()" style="background:#33334D; color:white; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer;">📜 View Logs</button>
     </div>
 
@@ -153,7 +153,7 @@
         </div>
       </div>
       <div class="profit-actions">
-        <button onclick="showEditProfitModal()" style="background:rgba(0,229,184,0.2); color:var(--profit); border:none; padding:10px 20px; border-radius:9999px; cursor:pointer;">✏️ Edit Base Profit</button>
+        <button onclick="showEditProfitModal()" style="background:rgba(0,229,184,0.2); color:var(--profit); border:none; padding:10px 20px; border-radius:9999px; cursor:pointer;">✏️ Edit Base Prof</button>
         <button onclick="showAddExpenseModal()" class="expense-btn">💸 Add Spent</button>
       </div>
       <div class="expenses-list" id="expensesList"></div>
@@ -657,7 +657,7 @@
         return;
       }
 
-      const val = money(parseFloat(inputVal));
+      let val = parseFloat(inputVal);
       
       if (isNaN(val)) {
         showNotification("❌ Invalid amount");
@@ -669,6 +669,7 @@
         return;
       }
 
+      val = money(val);
       baseProfit = val;
       saveData();
       renderExpenses();
