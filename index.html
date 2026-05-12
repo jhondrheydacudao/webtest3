@@ -114,14 +114,12 @@
     <span style="font-size:0.95rem; color:var(--accent);">Super Shy - NewJeans</span>
   </div>
 
-  <div id="notification">
-    <span id="notificationText"></span>
-  </div>
+  <div id="notification"><span id="notificationText"></span></div>
 
   <div id="logsPanel">
     <div class="log-header">
       <h2>Activity Logs</h2>
-      <button onclick="clearLogs()" style="background:#d9534f; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;">Clear</button>
+      <button onclick="clearLogs()" style="background:#d9534f;color:white;border:none;padding:6px 12px;border-radius:8px;cursor:pointer;">Clear</button>
     </div>
     <div id="logsContainer"></div>
   </div>
@@ -133,15 +131,9 @@
     </header>
 
     <div style="text-align:right; margin-bottom:12px; display:flex; gap:10px; justify-content:flex-end; flex-wrap:wrap;">
-      <button onclick="manualDownload()" style="background:var(--accent); color:#000; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer; font-weight:600;">
-        ⬇️ Save database.txt
-      </button>
-      <button onclick="document.getElementById('importFileInput').click()" style="background:#4a6cf7; color:white; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer; font-weight:600;">
-        📂 Load from database.txt
-      </button>
-      <button onclick="toggleLogs()" style="background:#33334D; color:white; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer;">
-        📜 View Logs
-      </button>
+      <button onclick="manualDownload()" style="background:var(--accent); color:#000; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer; font-weight:600;">⬇️ Save database.txt</button>
+      <button onclick="document.getElementById('importFileInput').click()" style="background:#4a6cf7; color:white; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer; font-weight:600;">📂 Load from database.txt</button>
+      <button onclick="toggleLogs()" style="background:#33334D; color:white; border:none; padding:10px 18px; border-radius:9999px; cursor:pointer;">📜 View Logs</button>
     </div>
 
     <div class="savings-cart">
@@ -161,9 +153,7 @@
         </div>
       </div>
       <div class="profit-actions">
-        <button onclick="showEditProfitModal()" style="background:rgba(0,229,184,0.2); color:var(--profit); border:none; padding:10px 20px; border-radius:9999px; cursor:pointer;">
-          ✏️ Edit Base Profit
-        </button>
+        <button onclick="showEditProfitModal()" style="background:rgba(0,229,184,0.2); color:var(--profit); border:none; padding:10px 20px; border-radius:9999px; cursor:pointer;">✏️ Edit Base Profit</button>
         <button onclick="showAddExpenseModal()" class="expense-btn">💸 Add Spent</button>
       </div>
       <div class="expenses-list" id="expensesList"></div>
@@ -176,11 +166,9 @@
     <div id="recordsContainer"></div>
   </div>
 
-  <audio id="bgMusic" loop>
-    <source src="Super Shy.mp3" type="audio/mpeg">
-  </audio>
+  <audio id="bgMusic" loop><source src="Super Shy.mp3" type="audio/mpeg"></audio>
 
-  <!-- Add New Record Modal -->
+  <!-- Modals -->
   <div class="modal" id="addModal">
     <div class="modal-content">
       <h2>Add New Savings Record</h2>
@@ -202,7 +190,6 @@
     </div>
   </div>
 
-  <!-- Edit Record Modal -->
   <div class="modal" id="editModal">
     <div class="modal-content">
       <h2>Edit Record Info</h2>
@@ -218,7 +205,6 @@
     </div>
   </div>
 
-  <!-- Edit Profit Modal -->
   <div class="modal" id="editProfitModal">
     <div class="modal-content">
       <h2>Edit Base Profit</h2>
@@ -231,7 +217,6 @@
     </div>
   </div>
 
-  <!-- Add Expense Modal -->
   <div class="modal" id="addExpenseModal">
     <div class="modal-content">
       <h2>Add Spent Amount</h2>
@@ -267,7 +252,7 @@
 
     function getOverallProfit() {
       const totalSaved = calculateTotalSaved();
-      const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0);
+      const totalSpent = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
       return money(baseProfit + totalSaved - totalSpent);
     }
 
@@ -277,7 +262,7 @@
     }
 
     function buildDatabase() {
-      const cleanExpenses = expenses.map(e => ({ amount: e.amount, note: e.note || e.desc || "Expense", time: e.time || e.date || "" }));
+      const cleanExpenses = expenses.map(e => ({ amount: e.amount, note: e.note || e.desc || "Expense", time: e.time || "" }));
       const cleanLogs = logs.map(l => ({ time: l.time, action: l.action.replace(/<[^>]*>/g, '') }));
       return JSON.stringify({
         savedAt: new Date().toLocaleString('en-US', { timeZone: 'Asia/Manila' }),
@@ -314,26 +299,17 @@
       reader.onload = function(e) {
         try {
           const db = JSON.parse(e.target.result.trim());
-          if (!db.records || !Array.isArray(db.records)) {
-            alert("⚠️ This doesn't look like a Maya Savings database.txt file.");
-            return;
-          }
-          if (!confirm(`Load data from "${file.name}"? This will replace current data.`)) return;
-
           records = db.records || [];
-          baseProfit = money(db.baseProfit ?? db.overallProfit ?? 400);
-          expenses = (db.expenses || []).map(e => ({ amount: money(e.amount), note: e.note || e.desc || "Expense", time: e.time || e.date || "" }));
+          baseProfit = money(db.baseProfit ?? 400);
+          expenses = (db.expenses || []).map(e => ({ amount: money(e.amount || 0), note: e.note || e.desc || "Expense", time: e.time || "" }));
           logs = db.logs || [];
-
           saveData();
           document.getElementById('asOfDate').textContent = `As of ${getPHDate()}`;
           renderAllRecords();
-          renderExpenses();
-          renderLogs();
           showNotification(`✅ Loaded from "${file.name}"`);
           addLog(`Imported data from <strong>${file.name}</strong>`);
         } catch(err) {
-          alert("❌ Failed to read file.\n\n" + err.message);
+          alert("❌ Failed to read file.");
         }
         event.target.value = '';
       };
@@ -392,23 +368,15 @@
     }
 
     function loadData() {
-      const saved = localStorage.getItem('mayaSavingsRecords');
-      if (saved) records = JSON.parse(saved);
-      else {
-        records = [
-          {id:1, name:"Maya Savings Record 1", startDate:"04/01/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:100,status:"success",missing:0,date:""}))},
-          {id:2, name:"Maya Savings Record 2", startDate:"04/20/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))},
-          {id:3, name:"Maya Savings Record 3", startDate:"05/18/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))},
-          {id:4, name:"Maya Savings Record 4", startDate:"06/15/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))},
-        ];
-      }
+      const savedRecords = localStorage.getItem('mayaSavingsRecords');
+      if (savedRecords) records = JSON.parse(savedRecords);
 
       const savedProfit = localStorage.getItem('mayaBaseProfit');
       if (savedProfit !== null) baseProfit = money(parseFloat(savedProfit));
 
       const savedExpenses = localStorage.getItem('mayaExpenses');
       if (savedExpenses) {
-        expenses = JSON.parse(savedExpenses).map(e => ({ ...e, amount: money(e.amount) }));
+        expenses = JSON.parse(savedExpenses).map(e => ({ ...e, amount: money(e.amount || 0) }));
       }
 
       const savedLogs = localStorage.getItem('mayaLogs');
@@ -416,7 +384,7 @@
 
       document.getElementById('asOfDate').textContent = `As of ${getPHDate()}`;
 
-      // FIXED: Ensure profit is correctly calculated and displayed on load
+      // FIXED: Force correct profit calculation on load
       renderAllRecords();
       renderExpenses();
       renderLogs();
@@ -494,18 +462,18 @@
       records.forEach(r => html += renderRecord(r));
       document.getElementById('recordsContainer').innerHTML = html;
       document.getElementById('totalSaved').textContent = `₱${calculateTotalSaved()}`;
-      renderExpenses(); // Ensure profit updates
+      renderExpenses();
     }
 
     function renderExpenses() {
-      const totalSpent = money(expenses.reduce((sum, e) => sum + e.amount, 0));
+      const totalSpent = money(expenses.reduce((sum, e) => sum + (e.amount || 0), 0));
       const profit = getOverallProfit();
       document.getElementById('totalSpent').textContent = `₱${totalSpent}`;
       document.getElementById('overallProfit').textContent = `₱${profit}`;
 
       let html = '<strong style="color:#aaa; font-size:0.9rem;">Recent Expenses</strong>';
       expenses.slice(0, 6).forEach(exp => {
-        html += `<div class="expense-item"><div>${exp.note || exp.desc || ''}</div><div class="expense-amount">-₱${exp.amount}</div></div>`;
+        html += `<div class="expense-item"><div>${exp.note || "Expense"}</div><div class="expense-amount">-₱${exp.amount}</div></div>`;
       });
       document.getElementById('expensesList').innerHTML = html;
     }
@@ -655,7 +623,6 @@
       const amount = money(parseFloat(document.getElementById('expenseAmount').value));
       const note = document.getElementById('expenseDesc').value.trim() || "Expense";
       if (!amount || amount <= 0) { alert("Please enter a valid amount"); return; }
-
       expenses.unshift({ amount, note, time: getCurrentPHTime() });
       saveData();
       renderAllRecords();
