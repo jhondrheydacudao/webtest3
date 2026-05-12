@@ -259,8 +259,16 @@
     }
 
     function getOverallProfit() {
-      // Return only the baseProfit so editing it sets the displayed overall profit directly.
-      return money(Number(baseProfit || 0));
+      const totalSaved = Number(calculateTotalSaved()) || 0;
+      const totalSpent = money(expenses.reduce((sum, e) => {
+        return sum + Number(e.amount || 0);
+      }, 0));
+
+      return money(
+        Number(baseProfit || 0) +
+        totalSaved -
+        totalSpent
+      );
     }
 
     function triggerAutoDownload() {
@@ -609,4 +617,99 @@
 
     function saveEditRecord() {
       const id = parseInt(document.getElementById('editId').value);
-    
+      const record = records.find(r => r.id === id);
+      if (record) {
+        record.name = document.getElementById('editName').value.trim() || record.name;
+        record.startDate = document.getElementById('editStartDate').value.trim() || record.startDate;
+        saveData();
+        renderAllRecords();
+        hideEditModal();
+        showNotification("Record updated");
+        addLog(`Edited record: <strong>${record.name}</strong>`);
+        triggerAutoDownload();
+      }
+    }
+
+    function deleteRecord(id) {
+      const record = records.find(r => r.id === id);
+      if (confirm(`Delete "${record ? record.name : ''}"?`)) {
+        addLog(`Deleted record: <strong>${record.name}</strong>`);
+        records = records.filter(r => r.id !== id);
+        saveData();
+        renderAllRecords();
+        showNotification("Record deleted");
+        triggerAutoDownload();
+      }
+    }
+
+    function showEditProfitModal() {
+      document.getElementById('profitInput').value = baseProfit;
+      document.getElementById('editProfitModal').style.display = 'flex';
+      document.getElementById('profitInput').focus();
+    }
+    function hideEditProfitModal() { document.getElementById('editProfitModal').style.display = 'none'; }
+
+    function saveProfitAmount() {
+      const inputVal = document.getElementById('profitInput').value.trim();
+      
+      if (!inputVal) {
+        showNotification("❌ Please enter an amount");
+        return;
+      }
+
+      let val = parseFloat(inputVal);
+      
+      if (isNaN(val)) {
+        showNotification("❌ Invalid amount");
+        return;
+      }
+
+      if (val < 0) {
+        showNotification("❌ Amount cannot be negative");
+        return;
+      }
+
+      val = money(val);
+      baseProfit = val;
+      saveData();
+      renderExpenses();
+      hideEditProfitModal();
+      showNotification(`✅ Base Profit updated to ₱${val}`);
+      addLog(`Set base profit to <strong>₱${val}</strong>`);
+      triggerAutoDownload();
+    }
+
+    function showAddExpenseModal() {
+      document.getElementById('expenseAmount').value = '';
+      document.getElementById('expenseDesc').value = '';
+      document.getElementById('addExpenseModal').style.display = 'flex';
+      document.getElementById('expenseAmount').focus();
+    }
+    function hideAddExpenseModal() { document.getElementById('addExpenseModal').style.display = 'none'; }
+
+    function addExpense() {
+      const amount = money(parseFloat(document.getElementById('expenseAmount').value));
+      const note = document.getElementById('expenseDesc').value.trim() || "Expense";
+      if (!amount || amount <= 0) { alert("Please enter a valid amount"); return; }
+      expenses.unshift({ amount, note, time: getCurrentPHTime() });
+      saveData();
+      renderAllRecords();
+      hideAddExpenseModal();
+      showNotification(`₱${amount} spent recorded`);
+      addLog(`Spent ₱${amount} (${note})`);
+      triggerAutoDownload();
+    }
+
+    function getNextMonday() {
+      const now = new Date(new Date().toLocaleString("en-US", { timeZone: "Asia/Manila" }));
+      let days = (1 - now.getDay() + 7) % 7;
+      if (days === 0) days = 7;
+      const next = new Date(now);
+      next.setDate(now.getDate() + days);
+      return next.toLocaleDateString('en-US', {month:'2-digit', day:'2-digit', year:'2-digit'});
+    }
+
+    window.onload = loadData;
+  </script>
+</body>
+</html>
