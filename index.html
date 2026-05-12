@@ -209,7 +209,7 @@
     <div class="modal-content">
       <h2>Edit Base Profit</h2>
       <label>Amount (₱)</label>
-      <input type="number" id="profitInput" style="width:100%; padding:12px;">
+      <input type="number" id="profitInput" style="width:100%; padding:12px;" min="0" step="0.01">
       <div class="modal-buttons">
         <button class="cancel-btn" onclick="hideEditProfitModal()">Cancel</button>
         <button class="create-btn" onclick="saveProfitAmount()">Save</button>
@@ -221,7 +221,7 @@
     <div class="modal-content">
       <h2>Add Spent Amount</h2>
       <label>Amount (₱)</label>
-      <input type="number" id="expenseAmount" placeholder="100" style="width:100%; padding:14px; font-size:1.1rem;">
+      <input type="number" id="expenseAmount" placeholder="100" style="width:100%; padding:14px; font-size:1.1rem;" min="0" step="0.01">
       <label>Description</label>
       <input type="text" id="expenseDesc" placeholder="Food, Shopping, etc." style="width:100%; padding:14px;">
       <div class="modal-buttons">
@@ -645,26 +645,44 @@
     function showEditProfitModal() {
       document.getElementById('profitInput').value = baseProfit;
       document.getElementById('editProfitModal').style.display = 'flex';
+      document.getElementById('profitInput').focus();
     }
     function hideEditProfitModal() { document.getElementById('editProfitModal').style.display = 'none'; }
 
     function saveProfitAmount() {
-      const val = money(parseFloat(document.getElementById('profitInput').value));
-      if (!isNaN(val) && val >= 0) {
-        baseProfit = val;
-        saveData();
-        renderAllRecords();
-        hideEditProfitModal();
-        showNotification("Base Profit updated");
-        addLog(`Set base profit to <strong>₱${val}</strong>`);
-        triggerAutoDownload();
+      const inputVal = document.getElementById('profitInput').value.trim();
+      
+      if (!inputVal) {
+        showNotification("❌ Please enter an amount");
+        return;
       }
+
+      const val = money(parseFloat(inputVal));
+      
+      if (isNaN(val)) {
+        showNotification("❌ Invalid amount");
+        return;
+      }
+
+      if (val < 0) {
+        showNotification("❌ Amount cannot be negative");
+        return;
+      }
+
+      baseProfit = val;
+      saveData();
+      renderExpenses();
+      hideEditProfitModal();
+      showNotification(`✅ Base Profit updated to ₱${val}`);
+      addLog(`Set base profit to <strong>₱${val}</strong>`);
+      triggerAutoDownload();
     }
 
     function showAddExpenseModal() {
       document.getElementById('expenseAmount').value = '';
       document.getElementById('expenseDesc').value = '';
       document.getElementById('addExpenseModal').style.display = 'flex';
+      document.getElementById('expenseAmount').focus();
     }
     function hideAddExpenseModal() { document.getElementById('addExpenseModal').style.display = 'none'; }
 
