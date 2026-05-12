@@ -246,14 +246,30 @@
       return Math.round((n + Number.EPSILON) * 100) / 100;
     }
 
+    function calculateActual(weeks) {
+      return weeks.reduce((sum, w) => {
+        return sum + Number(w.received || 0);
+      }, 0);
+    }
+
     function calculateTotalSaved() {
-      return records.reduce((sum, r) => sum + calculateActual(r.weeks), 0);
+      return records.reduce((sum, r) => {
+        return sum + Number(calculateActual(r.weeks));
+      }, 0);
     }
 
     function getOverallProfit() {
-      const totalSaved = calculateTotalSaved();
-      const totalSpent = expenses.reduce((sum, e) => sum + (e.amount || 0), 0);
-      return money(baseProfit + totalSaved - totalSpent);
+      const totalSaved = Number(calculateTotalSaved()) || 0;
+
+      const totalSpent = expenses.reduce((sum, e) => {
+        return sum + Number(e.amount || 0);
+      }, 0);
+
+      return money(
+        Number(baseProfit || 0) +
+        totalSaved -
+        totalSpent
+      );
     }
 
     function triggerAutoDownload() {
@@ -299,7 +315,15 @@
       reader.onload = function(e) {
         try {
           const db = JSON.parse(e.target.result.trim());
-          records = db.records || [];
+          records = (db.records || []).map(record => ({
+            ...record,
+            weeks: record.weeks.map(week => ({
+              ...week,
+              target: Number(week.target || 0),
+              received: Number(week.received || 0),
+              missing: Number(week.missing || 0)
+            }))
+          }));
           baseProfit = money(db.baseProfit ?? 400);
           expenses = (db.expenses || []).map(e => ({ amount: money(e.amount || 0), note: e.note || e.desc || "Expense", time: e.time || "" }));
           logs = db.logs || [];
@@ -369,7 +393,24 @@
 
     function loadData() {
       const savedRecords = localStorage.getItem('mayaSavingsRecords');
-      if (savedRecords) records = JSON.parse(savedRecords);
+      if (savedRecords) {
+        records = JSON.parse(savedRecords).map(record => ({
+          ...record,
+          weeks: record.weeks.map(week => ({
+            ...week,
+            target: Number(week.target || 0),
+            received: Number(week.received || 0),
+            missing: Number(week.missing || 0)
+          }))
+        }));
+      } else {
+        records = [
+          {id:1, name:"Maya Savings Record 1", startDate:"04/01/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:100,status:"success",missing:0,date:""}))},
+          {id:2, name:"Maya Savings Record 2", startDate:"04/20/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))},
+          {id:3, name:"Maya Savings Record 3", startDate:"05/18/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))},
+          {id:4, name:"Maya Savings Record 4", startDate:"06/15/26", weeks: Array(4).fill(null).map((_,i)=>({week:i+1,target:100,received:0,status:"pending",missing:0,date:""}))},
+        ];
+      }
 
       const savedProfit = localStorage.getItem('mayaBaseProfit');
       if (savedProfit !== null) baseProfit = money(parseFloat(savedProfit));
@@ -384,7 +425,6 @@
 
       document.getElementById('asOfDate').textContent = `As of ${getPHDate()}`;
 
-      // FIXED: Force correct profit calculation on load
       renderAllRecords();
       renderExpenses();
       renderLogs();
@@ -395,10 +435,6 @@
       localStorage.setItem('mayaSavingsRecords', JSON.stringify(records));
       localStorage.setItem('mayaBaseProfit', baseProfit);
       localStorage.setItem('mayaExpenses', JSON.stringify(expenses));
-    }
-
-    function calculateActual(weeks) {
-      return weeks.reduce((sum, w) => sum + (w.received || 0), 0);
     }
 
     function formatDate(baseDate, weekNum, customDate = "") {
@@ -482,7 +518,7 @@
       const record = records.find(r => r.id === recordId);
       const week = record?.weeks.find(w => w.week === weekNum);
       if (week) {
-        week.received = money(parseFloat(value) || 0);
+        week.received = Number(money(parseFloat(value) || 0));
         saveData();
         renderAllRecords();
         showNotification(`Week ${weekNum} updated`);
@@ -507,7 +543,11 @@
       const week = record?.weeks.find(w => w.week === weekNum);
       if (week) {
         week.missing = money(parseFloat(value) || 0);
-        week.received = money(week.target - week.missing);
+        week.received = Number(
+          money(
+            Number(week.target) - Number(week.missing)
+          )
+        );
         saveData();
         renderAllRecords();
         triggerAutoDownload();
@@ -519,11 +559,21 @@
       const week = record?.weeks.find(w => w.week === weekNum);
       if (!week) return;
       week.status = newStatus;
-      if (newStatus === "success") { week.received = week.target; week.missing = 0; }
-      else if (newStatus === "pending") { week.received = 0; week.missing = 0; }
+      if (newStatus === "success") { 
+        week.received = Number(week.target); 
+        week.missing = 0; 
+      }
+      else if (newStatus === "pending") { 
+        week.received = 0; 
+        week.missing = 0; 
+      }
       else if (newStatus === "warning") {
         if (!week.missing) week.missing = 100;
-        week.received = money(week.target - week.missing);
+        week.received = Number(
+          money(
+            Number(week.target) - Number(week.missing)
+          )
+        );
       }
       saveData();
       renderAllRecords();
